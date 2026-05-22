@@ -6,7 +6,7 @@ backend/__pycache__/
 # Secrets
 backend/.env
 
-# App data
+# Generated app data
 backend/uploads/
 backend/chroma_db/
 backend/documents.json
@@ -15,8 +15,12 @@ backend/documents.json
 frontend/node_modules/
 frontend/dist/
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
-lumina api.txt
+# Generated images
+backend/*.png
+backend/*.jpg
+backend/*.jpeg
+backend/*.webp
