@@ -50,13 +50,7 @@ app.include_router(chat.router)
 @app.on_event("startup")
 async def startup():
     print("STARTUP HIT")
-
-    try:
-        docstore.load_from_disk()
-        print("DOCSTORE LOADED")
-    except Exception as e:
-        print(f"DOCSTORE ERROR: {e}")
-
+    print("SKIPPING DOCSTORE LOAD")
     print("✅ PDF Assistant API ready")
 
 

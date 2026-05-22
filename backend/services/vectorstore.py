@@ -21,13 +21,22 @@ from models import Chunk
 # ── Singleton client ───────────────────────────────────────────────────────
 _embedder = None
 
+
 def _get_embedder():
     global _embedder
 
     if _embedder is None:
+        print("LOADING EMBEDDER...")
+
+        from sentence_transformers import SentenceTransformer
+
         _embedder = SentenceTransformer(
             "all-MiniLM-L6-v2"
         )
+
+        print("EMBEDDER LOADED")
+
+    return _embedder
 
     return _embedder
 _client: chromadb.ClientAPI | None = None
