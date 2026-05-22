@@ -1,0 +1,22 @@
+# Python
+backend/venv/
+backend/__pycache__/
+*.pyc
+
+# Secrets
+backend/.env
+
+# App data
+backend/uploads/
+backend/chroma_db/
+backend/documents.json
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+lumina api.txt
