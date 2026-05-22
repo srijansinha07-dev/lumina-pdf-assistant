@@ -4,8 +4,9 @@ services/vectorstore.py
 ChromaDB vector store with nomic-embed-text embeddings via Ollama.
 One ChromaDB collection per document (doc_id as collection name).
 """
-from sentence_transformers import SentenceTransformer
+
 from __future__ import annotations
+from sentence_transformers import SentenceTransformer
 
 import re
 
