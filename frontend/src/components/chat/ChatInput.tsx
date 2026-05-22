@@ -52,7 +52,7 @@ export const ChatInput: React.FC<Props> = ({
           animate={{ opacity: 1, y: 0 }}
           className="flex gap-1.5 flex-wrap mb-3"
         >
-          {console.log("Rendering chips", suggestions)}
+          
 
           {suggestions.map(s => (
             <button
