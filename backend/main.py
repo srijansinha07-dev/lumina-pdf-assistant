@@ -6,19 +6,30 @@ Run with:
   OR
   uvicorn main:app --reload --port 8000
 """
+
+print("MAIN.PY STARTED")
+
+import os
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import CORS_ORIGINS
+
+print("IMPORTING ROUTERS...")
 from routers import chat, documents
+
+print("IMPORTING DOCSTORE...")
 from services import docstore
-print("MAIN.PY STARTED")
+
+print("IMPORTS DONE")
+
 app = FastAPI(
     title="PDF Assistant API",
     description="Local AI PDF assistant — OCR-aware RAG with hybrid retrieval.",
     version="1.0.0",
 )
+
 print("FASTAPI CREATED")
 
 # ── CORS ───────────────────────────────────────────────────────────────────
@@ -39,8 +50,13 @@ app.include_router(chat.router)
 @app.on_event("startup")
 async def startup():
     print("STARTUP HIT")
-    docstore.load_from_disk()
-    print("DOCSTORE LOADED")
+
+    try:
+        docstore.load_from_disk()
+        print("DOCSTORE LOADED")
+    except Exception as e:
+        print(f"DOCSTORE ERROR: {e}")
+
     print("✅ PDF Assistant API ready")
 
 
@@ -48,8 +64,6 @@ async def startup():
 async def health():
     return {"status": "ok"}
 
-
-import os
 
 if __name__ == "__main__":
     uvicorn.run(
