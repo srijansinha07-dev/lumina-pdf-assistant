@@ -22,10 +22,18 @@ from services import vectorstore as vs
 # ── Optional reranker ──────────────────────────────────────────────────────
 try:
     from sentence_transformers import CrossEncoder
-    _reranker = CrossEncoder(RERANKER_MODEL)
-    RERANKER_OK = True
+
+    if RERANKER_MODEL:
+        _reranker = CrossEncoder(
+            RERANKER_MODEL
+        )
+        RERANKER_OK = True
+    else:
+        _reranker = None
+        RERANKER_OK = False
+
 except Exception:
-    _reranker  = None
+    _reranker = None
     RERANKER_OK = False
 
 

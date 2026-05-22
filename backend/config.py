@@ -50,7 +50,7 @@ TOP_K_BM25     = 10
 TOP_K_FINAL = 6           # chunks sent to LLM after reranking
 
 # ── Reranker ───────────────────────────────────────────────────────────────
-RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+RERANKER_MODEL = None
 
 # ── CORS ───────────────────────────────────────────────────────────────────
 CORS_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
