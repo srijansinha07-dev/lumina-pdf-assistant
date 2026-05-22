@@ -13,12 +13,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import CORS_ORIGINS
 from routers import chat, documents
 from services import docstore
-
+print("MAIN.PY STARTED")
 app = FastAPI(
     title="PDF Assistant API",
     description="Local AI PDF assistant — OCR-aware RAG with hybrid retrieval.",
     version="1.0.0",
 )
+print("FASTAPI CREATED")
 
 # ── CORS ───────────────────────────────────────────────────────────────────
 app.add_middleware(
@@ -37,8 +38,10 @@ app.include_router(chat.router)
 # ── Startup ────────────────────────────────────────────────────────────────
 @app.on_event("startup")
 async def startup():
+    print("STARTUP HIT")
     docstore.load_from_disk()
-    print("✅ PDF Assistant API ready — http://localhost:8000")
+    print("DOCSTORE LOADED")
+    print("✅ PDF Assistant API ready")
 
 
 @app.get("/api/health")
