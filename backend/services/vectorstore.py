@@ -4,6 +4,7 @@ services/vectorstore.py
 ChromaDB vector store with nomic-embed-text embeddings via Ollama.
 One ChromaDB collection per document (doc_id as collection name).
 """
+from sentence_transformers import SentenceTransformer
 from __future__ import annotations
 
 import re
@@ -17,6 +18,17 @@ from models import Chunk
 
 
 # ── Singleton client ───────────────────────────────────────────────────────
+_embedder = None
+
+def _get_embedder():
+    global _embedder
+
+    if _embedder is None:
+        _embedder = SentenceTransformer(
+            "all-MiniLM-L6-v2"
+        )
+
+    return _embedder
 _client: chromadb.ClientAPI | None = None
 
 def _get_client() -> chromadb.ClientAPI:
@@ -120,11 +132,18 @@ def semantic_search(
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
-def _embed(texts: list[str]) -> list[list[float]]:
-    return [
-        ollama.embeddings(model=EMBED_MODEL, prompt=t)["embedding"]
-        for t in texts
-    ]
+def _embed(
+    texts: list[str]
+) -> list[list[float]]:
+
+    embedder = _get_embedder()
+
+    embeddings = embedder.encode(
+        texts,
+        convert_to_numpy=True,
+    )
+
+    return embeddings.tolist()
 
 
 def _safe_col_name(doc_id: str) -> str:
