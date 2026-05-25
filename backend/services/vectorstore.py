@@ -76,7 +76,7 @@ def delete_collection(doc_id: str):
         pass
 
 
-def index_chunks(doc_id: str, chunks: list[Chunk], batch_size: int = 24) -> None:
+def index_chunks(doc_id: str, chunks: list[Chunk], batch_size: int = 6) -> None:
     """Embed and store chunks. Skips if collection already populated."""
     col = get_or_create_collection(doc_id)
     if col.count() > 0:
@@ -142,16 +142,23 @@ def semantic_search(
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
-def _embed(
-    texts: list[str]
-) -> list[list[float]]:
+def _embed(texts: list[str]) -> list[list[float]]:
+    from sentence_transformers import SentenceTransformer
+    import gc
 
-    embedder = _get_embedder()
+    embedder = SentenceTransformer(
+        "all-MiniLM-L6-v2",
+        device="cpu"
+    )
 
     embeddings = embedder.encode(
         texts,
         convert_to_numpy=True,
+        batch_size=4,
     )
+
+    del embedder
+    gc.collect()
 
     return embeddings.tolist()
 
