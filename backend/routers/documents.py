@@ -178,7 +178,7 @@ def _index_document(doc_id: str, pdf_path: str):
 
         suggestions = []
 
-        # General concept / theory docs
+        # General concept docs
         if any(
             keyword in preview_text
             for keyword in [
@@ -255,20 +255,6 @@ def _index_document(doc_id: str, pdf_path: str):
             doc_id,
             IndexStatus.ERROR
         )
-
-        # ── Generate smart suggestions ─────────────────────
-        preview_text = " ".join(
-            p.get("text", "")
-            if "pages" in locals():
-                for p in pages[:5]:
-       
-
-            
-        ).lower()
-
-        filename = pdf_path.lower()
-        suggestions = []
-
         # ── Legal / law / agreements ─────────────────────
         if any(word in preview_text for word in [
             "agreement",
