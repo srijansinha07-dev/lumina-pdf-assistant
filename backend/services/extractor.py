@@ -34,11 +34,8 @@ try:
         )
 
     # Railway / Linux
+        # Railway / Linux
     else:
-        pytesseract.pytesseract.tesseract_cmd = (
-            "tesseract"
-        )
-
         try:
             result = subprocess.run(
                 ["which", "tesseract"],
@@ -46,10 +43,23 @@ try:
                 text=True,
             )
 
-            print(
-                "WHICH TESSERACT:",
+            tesseract_path = (
                 result.stdout.strip()
             )
+
+            print(
+                "WHICH TESSERACT:",
+                tesseract_path
+            )
+
+            if tesseract_path:
+                pytesseract.pytesseract.tesseract_cmd = (
+                    tesseract_path
+                )
+            else:
+                pytesseract.pytesseract.tesseract_cmd = (
+                    "tesseract"
+                )
 
         except Exception as e:
             print(
@@ -57,10 +67,9 @@ try:
                 str(e)
             )
 
-    print(
-        "TESSERACT PATH:",
-        pytesseract.pytesseract.tesseract_cmd
-    )
+            pytesseract.pytesseract.tesseract_cmd = (
+                "tesseract"
+            )
 
 except ImportError:
     OCR_AVAILABLE = False
