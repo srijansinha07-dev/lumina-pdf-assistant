@@ -41,38 +41,56 @@ def answer(
     ocr_used: bool = False,
 ) -> str:
 
-    prompt = _build_prompt(
-        query,
-        context,
-        qtype,
-        page_num,
-        ocr_used,
-    )
+    try:
+        print("=== LLM START ===")
+        print("USE_GROQ:", USE_GROQ)
+        print("GROQ MODEL:", GROQ_MODEL)
+        print(
+            "GROQ KEY EXISTS:",
+            bool(GROQ_API_KEY)
+        )
 
-    print("USE_GROQ =", USE_GROQ)
-    print("GROQ MODEL =", GROQ_MODEL)
+        prompt = _build_prompt(
+            query,
+            context,
+            qtype,
+            page_num,
+            ocr_used,
+        )
 
-    client = Groq(
-        api_key=GROQ_API_KEY
-    )
+        client = Groq(
+            api_key=GROQ_API_KEY
+        )
 
-    resp = client.chat.completions.create(
-        model=GROQ_MODEL,
-        messages=[
-            {
-                "role": "user",
-                "content": prompt,
-            }
-        ],
-        temperature=0,
-        max_tokens=900,
-    )
+        resp = client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+            temperature=0,
+            max_tokens=900,
+        )
 
-    return (
-        resp.choices[0]
-        .message.content
-        .strip()
-    )
+        print("=== GROQ SUCCESS ===")
+
+        return (
+            resp.choices[0]
+            .message.content
+            .strip()
+        )
+
+    except Exception as e:
+        print(
+            "=== LLM ERROR ==="
+        )
+        print(str(e))
+
+        return (
+            f"LLM ERROR: {str(e)}"
+        )
 
     # ── Use Groq ───────────────────────────
     if USE_GROQ:

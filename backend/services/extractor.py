@@ -12,16 +12,25 @@ import re
 from typing import Optional
 
 import fitz  # PyMuPDF
-
 from config import OCR_THRESHOLD, OCR_DPI
 import os
+import shutil
 import pytesseract
 
-# Windows only
 if os.name == "nt":
     pytesseract.pytesseract.tesseract_cmd = (
         r"C:\Program Files\Tesseract-OCR\tesseract.exe"
     )
+else:
+    pytesseract.pytesseract.tesseract_cmd = (
+        shutil.which("tesseract")
+        or "/usr/bin/tesseract"
+    )
+
+print(
+    "TESSERACT PATH:",
+    pytesseract.pytesseract.tesseract_cmd
+)
 # ── Optional OCR dependencies ──────────────────────────────────────────────
 try:
     from PIL import Image, ImageFilter, ImageEnhance
