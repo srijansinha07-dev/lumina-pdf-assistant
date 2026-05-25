@@ -176,60 +176,132 @@ def _index_document(doc_id: str, pdf_path: str):
             c.text for c in chunks[:8]
         ).lower()[:4000]
 
+        filename = pdf_path.lower()
         suggestions = []
 
-        # General concept docs
+        # Legal / agreements
         if any(
-            keyword in preview_text
-            for keyword in [
-                "definition",
-                "algorithm",
-                "concept",
-                "process",
-                "introduction",
-                "overview",
+            word in preview_text
+            for word in [
+                "agreement",
+                "party",
+                "parties",
+                "clause",
+                "whereas",
+                "liable",
+                "liability",
+                "governing law",
+                "payment",
+                "terms",
+                "contract",
+                "legal",
+                "shall",
+                "hereby",
+                "jurisdiction",
+                "obligation",
+            ]
+        ) or any(
+            word in filename
+            for word in [
+                "agreement",
+                "contract",
+                "legal",
+                "law",
+                "terms",
             ]
         ):
-            suggestions.append(
-                "Summarize the document"
-            )
+            suggestions = [
+                "Summarize this agreement",
+                "What are the important clauses?",
+                "What obligations are mentioned?",
+                "Explain the key terms",
+            ]
 
-        # Math / technical docs
-        if any(
-            keyword in preview_text
-            for keyword in [
-                "formula",
+        # Resume / CV
+        elif any(
+            word in preview_text
+            for word in [
+                "experience",
+                "education",
+                "skills",
+                "internship",
+                "projects",
+                "certifications",
+                "linkedin",
+                "resume",
+                "curriculum vitae",
+            ]
+        ):
+            suggestions = [
+                "Summarize this profile",
+                "What skills are highlighted?",
+                "What projects are mentioned?",
+                "Summarize the experience",
+            ]
+
+        # Research papers
+        elif any(
+            word in preview_text
+            for word in [
+                "abstract",
+                "methodology",
+                "results",
+                "conclusion",
+                "experiment",
+                "study",
+                "literature review",
+                "research",
+            ]
+        ):
+            suggestions = [
+                "Summarize the key findings",
+                "Explain the methodology",
+                "What are the main contributions?",
+                "Summarize this paper",
+            ]
+
+        # Technical / textbook
+        elif any(
+            word in preview_text
+            for word in [
                 "equation",
-                "=",
+                "formula",
                 "theorem",
-                "proof",
+                "hypothesis",
+                "voltage",
+                "current",
+                "resistance",
+                "semiconductor",
+                "algorithm",
+                "probability",
+                "distribution",
+                "regression",
+                "statistics",
+                "mean",
+                "variance",
             ]
         ):
-            suggestions.append(
-                "What are the important formulas?"
-            )
+            suggestions = [
+                "Explain the key concepts",
+                "Find important formulas",
+                "Summarize this chapter",
+                "Quiz me on this topic",
+            ]
 
-        # Comparison-heavy docs
-        if any(
-            keyword in preview_text
-            for keyword in [
-                "advantage",
-                "disadvantage",
-                "compare",
-                "difference",
-                "pros",
-                "cons",
+        # Default
+        else:
+            suggestions = [
+                "Summarize this document",
+                "What are the key concepts?",
+                "Explain the main topics",
+                "What should I know from this PDF?",
             ]
-        ):
-            suggestions.append(
-                "What are the key differences?"
-            )
 
         # Save suggestions
         info = docstore.get_info(doc_id)
 
         if info:
-            info.suggestions = suggestions[:3]
+            info.suggestions = suggestions[:4]
 
         # Index chunks
         print("9. INDEXING CHUNKS")
@@ -255,125 +327,3 @@ def _index_document(doc_id: str, pdf_path: str):
             doc_id,
             IndexStatus.ERROR
         )
-        # ── Legal / law / agreements ─────────────────────
-        if any(word in preview_text for word in [
-            "agreement",
-            "party",
-            "parties",
-            "clause",
-            "whereas",
-            "liable",
-            "liability",
-            "governing law",
-            "payment",
-            "terms",
-            "contract",
-            "legal",
-            "shall",
-            "hereby",
-            "jurisdiction",
-            "obligation",
-        ]) or any(word in filename for word in [
-            "agreement",
-            "contract",
-            "legal",
-            "law",
-            "terms",
-        ]):
-
-            suggestions = [
-                "Summarize this agreement",
-                "What are the important clauses?",
-                "What obligations are mentioned?",
-                "Explain the key terms",
-            ]
-
-        # ── Resume / CV ─────────────────────
-        elif any(word in preview_text for word in [
-            "experience",
-            "education",
-            "skills",
-            "internship",
-            "projects",
-            "certifications",
-            "linkedin",
-            "resume",
-            "curriculum vitae",
-        ]):
-
-            suggestions = [
-                "Summarize this profile",
-                "What skills are highlighted?",
-                "What projects are mentioned?",
-                "Summarize the experience",
-            ]
-
-        # ── Research papers ─────────────────────
-        elif any(word in preview_text for word in [
-            "abstract",
-            "methodology",
-            "results",
-            "conclusion",
-            "experiment",
-            "study",
-            "literature review",
-            "research",
-        ]):
-
-            suggestions = [
-                "Summarize the key findings",
-                "Explain the methodology",
-                "What are the main contributions?",
-                "Summarize this paper",
-            ]
-
-        # ── Technical / textbook / engineering ─────────────────────
-        elif any(word in preview_text for word in [
-            "equation",
-            "formula",
-            "theorem",
-            "hypothesis",
-            "voltage",
-            "current",
-            "resistance",
-            "semiconductor",
-            "algorithm",
-            "probability",
-            "distribution",
-            "regression",
-            "statistics",
-            "mean",
-            "variance",
-        ]):
-
-            suggestions = [
-                "Explain the key concepts",
-                "Find important formulas",
-                "Summarize this chapter",
-                "Quiz me on this topic",
-            ]
-
-        # ── Default ─────────────────────
-        else:
-            suggestions = [
-                "Summarize this document",
-                "What are the key concepts?",
-                "Explain the main topics",
-                "What should I know from this PDF?",
-            ]
-
-        # Save suggestions
-        info = docstore.get_info(doc_id)
-        if info:
-            info.suggestions = suggestions
-
-        chunks = chunk_pages(pages, doc_id)
-        docstore.set_chunks(doc_id, chunks)
-
-        vectorstore.index_chunks(doc_id, chunks)
-
-        docstore.set_status(doc_id, IndexStatus.READY)
-
-    except Exception as e:
-        print(f"[ERROR] Indexing {doc_id}: {e}")
-        docstore.set_status(doc_id, IndexStatus.ERROR)
