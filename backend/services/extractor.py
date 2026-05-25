@@ -6,7 +6,10 @@ Hybrid PDF text extraction:
   2. Tesseract OCR fallback for image/formula-heavy pages
   3. Post-processing to fix common symbol encoding errors
 """
-from config import OCR_THRESHOLD, OCR_DPI
+from __future__ import annotations
+
+import re
+import fitz
 import os
 import subprocess
 

@@ -259,7 +259,11 @@ def _index_document(doc_id: str, pdf_path: str):
         # ── Generate smart suggestions ─────────────────────
         preview_text = " ".join(
             p.get("text", "")
-            for p in pages[:5]
+            if "pages" in locals():
+                for p in pages[:5]:
+       
+
+            
         ).lower()
 
         filename = pdf_path.lower()
