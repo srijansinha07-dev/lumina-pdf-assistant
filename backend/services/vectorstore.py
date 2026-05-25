@@ -6,7 +6,7 @@ One ChromaDB collection per document (doc_id as collection name).
 """
 
 from __future__ import annotations
-from sentence_transformers import SentenceTransformer
+
 
 import re
 
