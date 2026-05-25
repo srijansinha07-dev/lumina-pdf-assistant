@@ -35,31 +35,37 @@ try:
 
     # Railway / Linux
     else:
-        possible_paths = [
-            "/usr/bin/tesseract",
-            "/usr/local/bin/tesseract",
-            "/nix/var/nix/profiles/default/bin/tesseract",
-        ]
+        try:
+            result = subprocess.run(
+                ["find", "/", "-name", "tesseract"],
+                capture_output=True,
+                text=True,
+            )
 
-        found = False
+            found_paths = [
+                p.strip()
+                for p in result.stdout.split("\n")
+                if p.strip()
+            ]
 
-        for path in possible_paths:
-            if os.path.exists(path):
-                pytesseract.pytesseract.tesseract_cmd = (
-                    path
-                )
-
-                print(
-                    "FOUND TESSERACT:",
-                    path
-                )
-
-                found = True
-                break
-
-        if not found:
             print(
-                "NO TESSERACT PATH FOUND"
+                "FOUND TESSERACT PATHS:",
+                found_paths
+            )
+
+            if found_paths:
+                pytesseract.pytesseract.tesseract_cmd = (
+                    found_paths[0]
+                )
+            else:
+                pytesseract.pytesseract.tesseract_cmd = (
+                    "tesseract"
+                )
+
+        except Exception as e:
+            print(
+                "TESSERACT CHECK ERROR:",
+                str(e)
             )
 
             pytesseract.pytesseract.tesseract_cmd = (
