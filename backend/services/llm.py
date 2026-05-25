@@ -7,7 +7,7 @@ temperature = 0 throughout.
 """
 from __future__ import annotations
 
-import ollama
+
 from groq import Groq
 
 from config import (
@@ -47,6 +47,31 @@ def answer(
         qtype,
         page_num,
         ocr_used,
+    )
+
+    print("USE_GROQ =", USE_GROQ)
+    print("GROQ MODEL =", GROQ_MODEL)
+
+    client = Groq(
+        api_key=GROQ_API_KEY
+    )
+
+    resp = client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        ],
+        temperature=0,
+        max_tokens=900,
+    )
+
+    return (
+        resp.choices[0]
+        .message.content
+        .strip()
     )
 
     # ── Use Groq ───────────────────────────

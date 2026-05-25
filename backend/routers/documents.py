@@ -132,6 +132,7 @@ def _index_document(doc_id: str, pdf_path: str):
     try:
         print("1. START INDEX")
 
+        # Lazy imports to avoid startup OOM
         from services.chunker import chunk_pages
         print("2. CHUNKER IMPORTED")
 
@@ -141,29 +142,119 @@ def _index_document(doc_id: str, pdf_path: str):
         from services import vectorstore
         print("4. VECTORSTORE IMPORTED")
 
-        docstore.set_status(doc_id, IndexStatus.PROCESSING)
+        # Set processing state
+        docstore.set_status(
+            doc_id,
+            IndexStatus.PROCESSING
+        )
 
+        # Extract PDF
         print("5. EXTRACTING PDF")
         pages = extract_pdf(pdf_path)
 
         print("6. PAGES EXTRACTED")
-        docstore.set_pages(doc_id, pages)
+        docstore.set_pages(
+            doc_id,
+            pages
+        )
 
+        # Chunk document
         print("7. CHUNKING")
-        chunks = chunk_pages(pages, doc_id)
+        chunks = chunk_pages(
+            pages,
+            doc_id
+        )
 
         print("8. CHUNKS READY")
-        docstore.set_chunks(doc_id, chunks)
+        docstore.set_chunks(
+            doc_id,
+            chunks
+        )
 
+        # ── Smart suggestions ─────────────────────
+        preview_text = " ".join(
+            c.text for c in chunks[:8]
+        ).lower()[:4000]
+
+        suggestions = []
+
+        # General concept / theory docs
+        if any(
+            keyword in preview_text
+            for keyword in [
+                "definition",
+                "algorithm",
+                "concept",
+                "process",
+                "introduction",
+                "overview",
+            ]
+        ):
+            suggestions.append(
+                "Summarize the document"
+            )
+
+        # Math / technical docs
+        if any(
+            keyword in preview_text
+            for keyword in [
+                "formula",
+                "equation",
+                "=",
+                "theorem",
+                "proof",
+            ]
+        ):
+            suggestions.append(
+                "What are the important formulas?"
+            )
+
+        # Comparison-heavy docs
+        if any(
+            keyword in preview_text
+            for keyword in [
+                "advantage",
+                "disadvantage",
+                "compare",
+                "difference",
+                "pros",
+                "cons",
+            ]
+        ):
+            suggestions.append(
+                "What are the key differences?"
+            )
+
+        # Save suggestions
+        info = docstore.get_info(doc_id)
+
+        if info:
+            info.suggestions = suggestions[:3]
+
+        # Index chunks
         print("9. INDEXING CHUNKS")
-        vectorstore.index_chunks(doc_id, chunks)
+        vectorstore.index_chunks(
+            doc_id,
+            chunks
+        )
 
         print("10. INDEXING DONE")
-        docstore.set_status(doc_id, IndexStatus.READY)
+
+        # Mark ready
+        docstore.set_status(
+            doc_id,
+            IndexStatus.READY
+        )
 
     except Exception as e:
-        print(f"[ERROR] Indexing {doc_id}: {e}")
-        docstore.set_status(doc_id, IndexStatus.ERROR)
+        print(
+            f"[ERROR] Indexing {doc_id}: {e}"
+        )
+
+        docstore.set_status(
+            doc_id,
+            IndexStatus.ERROR
+        )
 
         # ── Generate smart suggestions ─────────────────────
         preview_text = " ".join(
