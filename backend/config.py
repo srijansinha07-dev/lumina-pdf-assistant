@@ -56,5 +56,8 @@ RERANKER_MODEL = None
 CORS_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+
+    # Vercel domains
+    "https://lumina-pdf-assistant-iepxl5yae-srijansinha07-devs-projects.vercel.app",
     "https://lumina-pdf-assistant.vercel.app",
 ]
