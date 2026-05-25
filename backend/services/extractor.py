@@ -34,47 +34,49 @@ try:
         )
 
     # Railway / Linux
-        # Railway / Linux
     else:
-        try:
-            result = subprocess.run(
-                ["which", "tesseract"],
-                capture_output=True,
-                text=True,
-            )
+        possible_paths = [
+            "/usr/bin/tesseract",
+            "/usr/local/bin/tesseract",
+            "/nix/var/nix/profiles/default/bin/tesseract",
+        ]
 
-            tesseract_path = (
-                result.stdout.strip()
-            )
+        found = False
 
-            print(
-                "WHICH TESSERACT:",
-                tesseract_path
-            )
-
-            if tesseract_path:
+        for path in possible_paths:
+            if os.path.exists(path):
                 pytesseract.pytesseract.tesseract_cmd = (
-                    tesseract_path
-                )
-            else:
-                pytesseract.pytesseract.tesseract_cmd = (
-                    "tesseract"
+                    path
                 )
 
-        except Exception as e:
+                print(
+                    "FOUND TESSERACT:",
+                    path
+                )
+
+                found = True
+                break
+
+        if not found:
             print(
-                "TESSERACT CHECK ERROR:",
-                str(e)
+                "NO TESSERACT PATH FOUND"
             )
 
             pytesseract.pytesseract.tesseract_cmd = (
                 "tesseract"
             )
 
+    print(
+        "TESSERACT PATH:",
+        pytesseract.pytesseract.tesseract_cmd
+    )
+
 except ImportError:
     OCR_AVAILABLE = False
-    print("OCR dependencies unavailable")
 
+    print(
+        "OCR dependencies unavailable"
+    )
 # ── Symbol / formula regex ─────────────────────────────────────────────────
 FORMULA_RE = re.compile(
     r'[μσαβρΣΩ∑√±∞≈≠≤≥∈∉]'
