@@ -15,10 +15,7 @@ from fastapi.responses import JSONResponse
 
 from config import UPLOAD_DIR
 from models import DocumentInfo, IndexStatus, PagePreviewResponse, UploadResponse
-from services import docstore, vectorstore
-from services.chunker import chunk_pages
-from services.extractor import extract_pdf, render_page_image
-from services.retriever import invalidate_bm25
+from services import docstore
 
 router = APIRouter(prefix="/api/documents", tags=["documents"])
 
@@ -85,12 +82,18 @@ async def get_document(doc_id: str):
 
 @router.delete("/{doc_id}")
 async def delete_document(doc_id: str):
+    from services import vectorstore
+    from services.retriever import invalidate_bm25
+
     pdf_path = docstore.get_pdf_path(doc_id)
+
     if pdf_path:
         Path(pdf_path).unlink(missing_ok=True)
+
     vectorstore.delete_collection(doc_id)
     invalidate_bm25(doc_id)
     docstore.delete_doc(doc_id)
+
     return {"ok": True}
 
 
@@ -98,6 +101,7 @@ async def delete_document(doc_id: str):
 
 @router.get("/{doc_id}/pages/{page_num}", response_model=PagePreviewResponse)
 async def get_page(doc_id: str, page_num: int):
+    from services.extractor import render_page_image
     info = docstore.get_info(doc_id)
     if not info:
         raise HTTPException(404, "Document not found.")
@@ -125,6 +129,9 @@ async def get_page(doc_id: str, page_num: int):
 # ── Background indexing task ───────────────────────────────────────────────
 
 def _index_document(doc_id: str, pdf_path: str):
+    from services.chunker import chunk_pages
+    from services.extractor import extract_pdf
+    from services import vectorstore
     try:
         docstore.set_status(doc_id, IndexStatus.PROCESSING)
 
