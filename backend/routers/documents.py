@@ -129,14 +129,41 @@ async def get_page(doc_id: str, page_num: int):
 # ── Background indexing task ───────────────────────────────────────────────
 
 def _index_document(doc_id: str, pdf_path: str):
-    from services.chunker import chunk_pages
-    from services.extractor import extract_pdf
-    from services import vectorstore
     try:
+        print("1. START INDEX")
+
+        from services.chunker import chunk_pages
+        print("2. CHUNKER IMPORTED")
+
+        from services.extractor import extract_pdf
+        print("3. EXTRACTOR IMPORTED")
+
+        from services import vectorstore
+        print("4. VECTORSTORE IMPORTED")
+
         docstore.set_status(doc_id, IndexStatus.PROCESSING)
 
+        print("5. EXTRACTING PDF")
         pages = extract_pdf(pdf_path)
+
+        print("6. PAGES EXTRACTED")
         docstore.set_pages(doc_id, pages)
+
+        print("7. CHUNKING")
+        chunks = chunk_pages(pages, doc_id)
+
+        print("8. CHUNKS READY")
+        docstore.set_chunks(doc_id, chunks)
+
+        print("9. INDEXING CHUNKS")
+        vectorstore.index_chunks(doc_id, chunks)
+
+        print("10. INDEXING DONE")
+        docstore.set_status(doc_id, IndexStatus.READY)
+
+    except Exception as e:
+        print(f"[ERROR] Indexing {doc_id}: {e}")
+        docstore.set_status(doc_id, IndexStatus.ERROR)
 
         # ── Generate smart suggestions ─────────────────────
         preview_text = " ".join(
