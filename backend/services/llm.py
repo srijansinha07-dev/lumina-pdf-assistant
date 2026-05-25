@@ -92,31 +92,7 @@ def answer(
             f"LLM ERROR: {str(e)}"
         )
 
-    # ── Use Groq ───────────────────────────
-    if USE_GROQ:
-        client = Groq(
-            api_key=GROQ_API_KEY
-        )
 
-        resp = client.chat.completions.create(
-            model=GROQ_MODEL,
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
-            temperature=0,
-            max_tokens=900,
-        )
-
-        return (
-            resp.choices[0]
-            .message.content
-            .strip()
-        )
-
-    # ── Fallback to Ollama ─────────────────
     raise RuntimeError(
     "Groq is not enabled. Check USE_GROQ and GROQ_API_KEY."
 )

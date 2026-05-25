@@ -114,13 +114,24 @@ export const ChatPanel: React.FC = () => {
           },
         },
       })
-    } catch (err: any) {
+        } catch (err: any) {
+      console.error(
+        'CHAT ERROR:',
+        err
+      )
+
+      const errorMessage =
+        err?.response?.data?.detail ||
+        err?.response?.data?.answer ||
+        err?.message ||
+        'Something went wrong.'
+
       dispatch({
         type: 'UPDATE_MESSAGE',
         payload: {
-          id:      assistantId,
+          id: assistantId,
           updates: {
-            content: 'Something went wrong. Make sure the backend is running and Ollama is available.',
+            content: `Error: ${errorMessage}`,
             loading: false,
           },
         },

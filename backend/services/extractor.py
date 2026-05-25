@@ -6,39 +6,60 @@ Hybrid PDF text extraction:
   2. Tesseract OCR fallback for image/formula-heavy pages
   3. Post-processing to fix common symbol encoding errors
 """
-from __future__ import annotations
-
-import re
-from typing import Optional
-
-import fitz  # PyMuPDF
 from config import OCR_THRESHOLD, OCR_DPI
 import os
-import shutil
-import pytesseract
+import subprocess
 
-if os.name == "nt":
-    pytesseract.pytesseract.tesseract_cmd = (
-        r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-    )
-else:
-    pytesseract.pytesseract.tesseract_cmd = (
-        shutil.which("tesseract")
-        or "/usr/bin/tesseract"
-    )
-
-print(
-    "TESSERACT PATH:",
-    pytesseract.pytesseract.tesseract_cmd
-)
 # ── Optional OCR dependencies ──────────────────────────────────────────────
 try:
-    from PIL import Image, ImageFilter, ImageEnhance
+    from PIL import (
+        Image,
+        ImageFilter,
+        ImageEnhance,
+    )
+
     import pytesseract
+
     OCR_AVAILABLE = True
+
+    # Windows local dev
+    if os.name == "nt":
+        pytesseract.pytesseract.tesseract_cmd = (
+            r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+        )
+
+    # Railway / Linux
+    else:
+        pytesseract.pytesseract.tesseract_cmd = (
+            "tesseract"
+        )
+
+        try:
+            result = subprocess.run(
+                ["which", "tesseract"],
+                capture_output=True,
+                text=True,
+            )
+
+            print(
+                "WHICH TESSERACT:",
+                result.stdout.strip()
+            )
+
+        except Exception as e:
+            print(
+                "TESSERACT CHECK ERROR:",
+                str(e)
+            )
+
+    print(
+        "TESSERACT PATH:",
+        pytesseract.pytesseract.tesseract_cmd
+    )
+
 except ImportError:
     OCR_AVAILABLE = False
-
+    print("OCR dependencies unavailable")
 
 # ── Symbol / formula regex ─────────────────────────────────────────────────
 FORMULA_RE = re.compile(
