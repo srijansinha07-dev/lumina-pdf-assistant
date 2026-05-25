@@ -74,24 +74,9 @@ def answer(
         )
 
     # ── Fallback to Ollama ─────────────────
-    resp = ollama.chat(
-        model=LLM_MODEL,
-        messages=[
-            {
-                "role": "user",
-                "content": prompt,
-            }
-        ],
-        options={
-            "temperature": 0,
-            "num_predict": 1200,
-        },
-    )
-
-    return (
-        resp["message"]["content"]
-        .strip()
-    )
+    raise RuntimeError(
+    "Groq is not enabled. Check USE_GROQ and GROQ_API_KEY."
+)
 
 
 # ── Prompt builders ────────────────────────────────────────────────────────
