@@ -28,49 +28,17 @@ try:
     OCR_AVAILABLE = True
 
     # Windows local dev
+        # Windows local dev
     if os.name == "nt":
         pytesseract.pytesseract.tesseract_cmd = (
             r"C:\Program Files\Tesseract-OCR\tesseract.exe"
         )
 
-    # Railway / Linux
+    # Railway / Linux (Docker)
     else:
-        try:
-            result = subprocess.run(
-                ["find", "/", "-name", "tesseract"],
-                capture_output=True,
-                text=True,
-            )
-
-            found_paths = [
-                p.strip()
-                for p in result.stdout.split("\n")
-                if p.strip()
-            ]
-
-            print(
-                "FOUND TESSERACT PATHS:",
-                found_paths
-            )
-
-            if found_paths:
-                pytesseract.pytesseract.tesseract_cmd = (
-                    found_paths[0]
-                )
-            else:
-                pytesseract.pytesseract.tesseract_cmd = (
-                    "tesseract"
-                )
-
-        except Exception as e:
-            print(
-                "TESSERACT CHECK ERROR:",
-                str(e)
-            )
-
-            pytesseract.pytesseract.tesseract_cmd = (
-                "tesseract"
-            )
+        pytesseract.pytesseract.tesseract_cmd = (
+            "/usr/bin/tesseract"
+        )
 
     print(
         "TESSERACT PATH:",
@@ -82,7 +50,7 @@ except ImportError:
 
     print(
         "OCR dependencies unavailable"
-    )
+    ) 
 # ── Symbol / formula regex ─────────────────────────────────────────────────
 FORMULA_RE = re.compile(
     r'[μσαβρΣΩ∑√±∞≈≠≤≥∈∉]'
