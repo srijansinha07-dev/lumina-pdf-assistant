@@ -9,7 +9,7 @@ import asyncio
 import base64
 import shutil
 from pathlib import Path
-
+from fastapi import Header
 from fastapi import APIRouter, BackgroundTasks, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 
@@ -26,6 +26,7 @@ router = APIRouter(prefix="/api/documents", tags=["documents"])
 async def upload_pdf(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
+    x_user_id: str = Header(...),
 ):
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(400, "Only PDF files are accepted.")
@@ -46,6 +47,7 @@ async def upload_pdf(
     info = docstore.register(
         doc_id=doc_id,
         name=file.filename,
+        user_id=x_user_id,
         pdf_path=str(pdf_path),
         pages=pages,
     )
@@ -63,25 +65,40 @@ async def upload_pdf(
 
 # ── List ───────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[DocumentInfo])
-async def list_documents():
-    return docstore.list_docs()
+@router.get(
+    "",
+    response_model=list[DocumentInfo]
+)
+async def list_documents(
+    x_user_id: str = Header(...)
+):
+    return docstore.list_docs(
+        x_user_id
+    )
 
 
 # ── Single document ────────────────────────────────────────────────────────
 
 @router.get("/{doc_id}", response_model=DocumentInfo)
-async def get_document(doc_id: str):
+async def get_document(
+    doc_id: str,
+    x_user_id: str = Header(...)
+):
     info = docstore.get_info(doc_id)
     if not info:
         raise HTTPException(404, "Document not found.")
+    if info.user_id != x_user_id:
+    raise HTTPException(
+        403,
+        "Unauthorized."
+    )
     return info
 
 
 # ── Delete ─────────────────────────────────────────────────────────────────
 
 @router.delete("/{doc_id}")
-async def delete_document(doc_id: str):
+async def delete_document(doc_id: str,x_user_id: str = Header(...)):
     from services import vectorstore
     from services.retriever import invalidate_bm25
 
@@ -93,6 +110,19 @@ async def delete_document(doc_id: str):
     vectorstore.delete_collection(doc_id)
     invalidate_bm25(doc_id)
     docstore.delete_doc(doc_id)
+
+    info = docstore.get_info(doc_id)
+
+    if not info:
+        raise HTTPException(
+            404,
+            "Document not found."
+        )
+    if info.user_id != x_user_id:
+        raise HTTPException(
+            403,
+            "Unauthorized."
+        )
 
     return {"ok": True}
 

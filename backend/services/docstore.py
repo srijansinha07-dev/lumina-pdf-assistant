@@ -33,13 +33,15 @@ def new_doc_id() -> str:
 
 
 def register(
-    doc_id:    str,
-    name:      str,
-    pdf_path:  str,
-    pages:     int,
+    doc_id: str,
+    user_id: str,
+    name: str,
+    pdf_path: str,
+    pages: int,
 ) -> DocumentInfo:
     info = DocumentInfo(
         doc_id=doc_id,
+        user_id=user_id,
         name=name,
         pages=pages,
         status=IndexStatus.PENDING,
@@ -107,8 +109,14 @@ def get_pdf_path(doc_id: str) -> str | None:
     return _store.get(doc_id, {}).get("pdf_path")
 
 
-def list_docs() -> list[DocumentInfo]:
-    return [v["info"] for v in _store.values()]
+def list_docs(
+    user_id: str
+) -> list[DocumentInfo]:
+    return [
+        v["info"]
+        for v in _store.values()
+        if v["info"].user_id == user_id
+    ]
 
 
 def delete_doc(doc_id: str):
