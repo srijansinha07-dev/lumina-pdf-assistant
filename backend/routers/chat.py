@@ -26,10 +26,10 @@ async def chat(req: ChatRequest,x_user_id: str = Header(...)):
     # ── Validate document ─────────────────────────────────────────────────
     info = docstore.get_info(req.doc_id)
     if info.user_id != x_user_id:
-    raise HTTPException(
-        403,
-        "Unauthorized."
-    )
+        raise HTTPException(
+            403,
+            "Unauthorized."
+        )
     if not info:
         raise HTTPException(404, "Document not found.")
     if info.status != IndexStatus.READY:
