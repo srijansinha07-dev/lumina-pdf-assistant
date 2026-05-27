@@ -88,10 +88,7 @@ async def get_document(
     if not info:
         raise HTTPException(404, "Document not found.")
     if info.user_id != x_user_id:
-    raise HTTPException(
-        403,
-        "Unauthorized."
-    )
+        raise HTTPException(403,"Unauthorized.")
     return info
 
 
